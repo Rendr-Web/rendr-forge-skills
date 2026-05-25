@@ -27,15 +27,23 @@ If you can't decide between Hole and Hardening, ask: *"If this shipped tonight a
 
 ## Findings & proof
 
-- **Exploit test**: a concrete, re-runnable demonstration that a Hole is real: the curl, the script, the failing test that reads the wrong tenant's row. The security analog of a feedback loop. **No exploit test → not a confirmed Hole, just a worry.**
+- **Evidence**: how a Hole is demonstrated to be real. Every Confirmed Hole has exactly one of:
+  - **runnable-test** — a re-runnable test, curl, or script in `.deslop/exploits/<id>.test.ts` (or similar) that is RED today: running it makes the bad thing happen. Preferred form.
+  - **code-inspection** — a precise pointer to the source (file:line) and a short reasoning paragraph showing the Hole is structurally present, used only when a runnable test is genuinely infeasible from the audit context (e.g. action runtime, prod-env value, infra not available). Requires a **Why no runnable test** justification field; the hand-off agent or fix-implementer either builds the missing test rig or fixes-and-manually-verifies (curl from prod, etc.), but never silently closes.
+- **Exploit test**: shorthand for the `runnable-test` evidence type. The security analog of a feedback loop. Always preferred over `code-inspection`.
 - **Compensating control**: a claimed mitigation that makes a Suspected Hole safe without fixing it in the obvious place (edge auth in front of an unauthed route, a deliberate cross-tenant support console). A control is a *claim*: it gets its own exploit test that proves the control actually blocks the bad outcome, and only counts when that test is green.
 - **Finding states**:
-  - **Suspected**: you have a hypothesis, no proof yet.
-  - **Confirmed**: exploit test is *red* (the bad thing happens). It's now a real Hole.
-  - **Closed**: fix applied, exploit test is *green* (the bad thing no longer happens) and you re-ran it yourself.
+  - **Suspected**: working state during the sweep. The auditor has a hypothesis but has not yet built evidence. **Suspected is transient** — by the time `FINDINGS.md` is delivered, every finding has been either promoted to Confirmed (with one of the two Evidence types) or discharged out of the report entirely. A delivered FINDINGS.md should never contain a Suspected entry.
+  - **Confirmed**: Evidence is in place. For `runnable-test` Evidence: the test is RED. For `code-inspection`: the source pointer + reasoning is recorded and the `Why no runnable test` field is filled. Either way the Hole blocks the gate.
+  - **Closed**: fix applied (in a later session, by `/tdd` / AFK / human — **not** by the audit skill), evidence re-verified. For `runnable-test`: the test is now GREEN. For `code-inspection`: the documented verification step has been carried out and recorded.
   - **Closed-by-control**: not fixed, but a compensating control was *proven* to block the bad outcome (its exploit test is green). Counts as Closed at the gate.
-  - **Accepted exception**: a Suspected/Confirmed Hole the owner deliberately chooses to carry, with a recorded justification and the owner's name, because the design is intentional and has no enforceable control. **Never silent**: it is surfaced at the gate for explicit sign-off, not closed.
+  - **Accepted exception**: a Confirmed Hole the owner deliberately chooses to carry, with a recorded justification and the owner's name, because the design is intentional and has no enforceable control. **Never silent**: it is surfaced at the gate for explicit sign-off, not closed.
 - **The Gate**: the written, per-app line. Every Confirmed Hole is Closed (or Closed-by-control), and every Accepted Exception is signed off in writing = ship. Nothing on the Hardening or Improvement lists may move the line.
+
+## Audit shape
+
+- **Audit-only**: `/plug-the-holes` produces findings + builds runnable-test evidence where feasible, then **stops**. It does not edit production code. Fix work moves to a separate session — `/tdd` against the RED exploit tests, or matt's `/to-prd` → `/to-issues` chain feeding AFK agents.
+- **Idempotent re-run**: `/deslop` runs the full chain every time. First run = NO-SHIP + report; subsequent runs after fix work = re-verify exploit suite → SHIP if all GREEN. `FINDINGS.md` carries a `Run log` of deltas at the top and per-Hole `First seen` / `Last changed` timestamps so each re-run is glanceable.
 
 ## Vocabulary layers (no drift with CONTEXT.md)
 
@@ -47,7 +55,7 @@ A finding uses both: *"the **Order export** path (domain) is a tenant-isolation 
 
 ## Prime heuristics
 
-- **Demonstrate, don't assert.** A Hole isn't real until you've reproduced it. This kills the endless theoretical-risk noise that audits of generated code drown in.
+- **Demonstrate, don't assert.** A Hole isn't real until you have evidence — a runnable test that goes red, or a precise code-inspection finding (with a recorded "Why no runnable test" justification) when running a test is genuinely infeasible from the audit context. Lazy "looks bad" assertions don't count. This kills the endless theoretical-risk noise that audits of generated code drown in.
 - **Money and identity first.** Auth, tenant isolation, and billing before anything else. Those are the breaches that end companies.
 - **Authn ≠ authz.** Knowing who someone is tells you nothing about what they may touch. Check the data layer, not the login.
 - **Scope once, at a seam.** Enforce tenant scoping through one shared wrapper, not re-implemented per function. This is where security and DRY are the same move.

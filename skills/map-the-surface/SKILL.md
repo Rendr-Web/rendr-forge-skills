@@ -38,43 +38,48 @@ Explore the codebase (use a subagent to explore if available). Don't grade anyth
 
 ### 3. Write SURFACE.md
 
-Structure it so the audit can be driven straight off it:
+Structure it so the audit can be driven straight off it. **Tables over prose** — every row is one auditable thing.
 
 ```markdown
-# SURFACE - <app name>
+# SURFACE — <app name>
+Generated YYYY-MM-DD by /map-the-surface. Inventory, no grading.
 
-## What it is
-<one paragraph: purpose, users, tenant definition>
-
-## Tenant model
-- Tenant = <org | user | …>, keyed by `<field>`
-- Models WITHOUT a tenant key: <list - these are pre-flagged>
+## App
+| Field    | Value                                                            |
+|----------|------------------------------------------------------------------|
+| Purpose  | <one line: what the app does, for whom>                           |
+| Users    | <e.g. operator / supervisor / client>                            |
+| Tenant   | <e.g. organisation, keyed by `organisationId` on every domain row>|
+| Stage    | <pre-launch / private beta / live with paying users>             |
 
 ## Data models
-| Model | Tenant key | Holds PII? | Notes |
-|-------|-----------|------------|-------|
+| Model | Tenant key | PII? | Notes |
+|-------|------------|------|-------|
+<one row per table/collection/schema. Models WITHOUT a tenant key are pre-flagged in Notes.>
 
-## Surface (entry points)
-| Entry point | Type | Auth expected? | Tenant-scoped? | Touches money? | Notes |
-|-------------|------|----------------|----------------|----------------|-------|
-<one row per route / public function / webhook / upload / consumer>
+## Entry points (the surface)
+| Entry point | Type | Auth expected? | Tenant-scoped? | Money? | Notes |
+|-------------|------|----------------|----------------|--------|-------|
+<one row per route / public function / webhook / upload / consumer / queue/cron consumer / client-callable backend function>
 
 ## Data stores
 | Store | Purpose | Backed up? | Notes |
+|-------|---------|------------|-------|
 
 ## Third-party services
 | Service | Used for | Key location | Costs per call? |
+|---------|----------|--------------|-----------------|
 
 ## Money & identity flows
-- Authn: <where/how>
+- Authn: <where / how>
 - Authz: <where it's meant to live>
 - Charging / entitlement paths: <list>
 
 ## Unknowns
-<anything you couldn't determine - these get resolved during the audit, not guessed>
+- <anything you couldn't determine — resolved by /plug-the-holes, not guessed>
 ```
 
-The **"Auth expected?" / "Tenant-scoped?"** columns are deliberately *claims to test*, not facts; `/plug-the-holes` turns each suspicious row into an exploit test. An honest "Unknowns" section is worth more than confident guesses. A vibe-coded app will have unknowns, and pretending otherwise is how Holes survive the audit.
+The **"Auth expected?" / "Tenant-scoped?"** columns are deliberately *claims to test*, not facts; `/plug-the-holes` turns each suspicious row into an exploit test (or, where infeasible, a documented code-inspection finding). An honest `Unknowns` section is worth more than confident guesses. A vibe-coded app will have unknowns, and pretending otherwise is how Holes survive the audit.
 
 ### 4. Hand off
 

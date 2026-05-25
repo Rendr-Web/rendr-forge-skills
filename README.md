@@ -8,26 +8,41 @@ A small, composable set built in the spirit of [mattpocock/skills](https://githu
 
 ## The pipeline
 
-You only ever type `/deslop`. It is the one entry point; it routes through the rest in order and skips steps whose output already exists (e.g. it skips `/setup-deslop` if `STACK.md` is already in the repo).
+You only ever type `/deslop`. It is the one entry point and it's **idempotent** — running it once gives you the audit + a NO-SHIP gate. Running it again after fix work re-verifies and flips to SHIP.
 
 ```
 /deslop                       ← the one entry point. Orchestrates everything below.
-  ├── /setup-deslop           step 0: first time in a repo only. Interviews your stack → STACK.md.
+  ├── /setup-deslop           step 0: first time in a repo only. Interviews your stack → STACK.md
   ├── /map-the-surface        recon → SURFACE.md
   ├── /plug-the-holes         security/ship-blocker audit → FINDINGS.md   ← the core
-  └── /launch-gate            the written go/no-go line → GATE.md
-                              then hand off for Phase 2:
-                              /improve-codebase-architecture · /diagnose · /tdd
+  │                           STOPS after building RED exploit tests; does NOT edit production code
+  └── /launch-gate            re-runs the exploit suite → SHIP if all GREEN, NO-SHIP if any RED
+                              produces / updates GATE.md
 ```
+
+Fix work happens *between* `/deslop` runs, not inside one. After the audit hands you `FINDINGS.md` + a RED exploit suite, you pick one of two chains and come back when fixes are done:
+
+```
+audit (today)                                            re-verify (later, same /deslop command)
+   │                                                              │
+   ▼                                                              │
+FINDINGS.md + RED exploit tests                                   │
+   │                                                              │
+   ├── matt's skills present → /to-prd → /to-issues → AFK / /tdd ─┤
+   │                                                              │
+   └── matt's skills absent  → /tdd <exploit-test-path> per Hole ─┘
+```
+
+Each closed Hole is its own small reviewable PR. No catastrophic 18-file structural diff in the audit session.
 
 ## The one idea
 
 Separate the defects that can hurt a customer on launch day (**Holes**) from the ones that only hurt you later (**Hardening**, **Improvement**). Close every Hole, write down the line, ship. Everything else is incremental and never blocks a launch.
 
 Three heuristics carry most of the weight:
-- **Demonstrate, don't assert.** A Hole isn't real until a re-runnable exploit test makes the bad thing happen.
+- **Demonstrate, don't assert.** A Hole isn't real until you have evidence: a re-runnable exploit test (preferred), or a precise code-inspection finding where a runnable test is genuinely infeasible from the audit context. Lazy "looks bad" assertions don't count.
 - **Money and identity first.** Auth, tenant isolation, and billing before anything else.
-- **Scope once, at a seam.** Enforce tenant scoping in one shared place; closing the Hole and removing the slop become the same edit.
+- **Scope once, at a seam.** Enforce tenant scoping in one shared place; closing the Hole and removing the slop become the same edit. The audit *names* the seam in `FINDINGS.md`; the fix-side skill (or AFK agent) *writes* it as one ticket plus N "route handler X" tickets.
 
 ## Reference
 
@@ -36,7 +51,7 @@ Three heuristics carry most of the weight:
 - **[deslop](./skills/deslop/SKILL.md)** is the orchestrator and the only entry point. It covers the holes-vs-improvement split, the run order, and the hand-off to architecture/diagnosis skills for Phase 2. Start here.
 - **[setup-deslop](./skills/setup-deslop/SKILL.md)** is step 0 inside `/deslop`, run automatically the first time in a repo (skipped on later runs if `STACK.md` exists). Interviews you about the stack and writes `STACK.md`, the overlay the audit reads.
 - **[map-the-surface](./skills/map-the-surface/SKILL.md)** does recon: data models, entry points, data stores, tenant model, and money flows into `SURFACE.md`.
-- **[plug-the-holes](./skills/plug-the-holes/SKILL.md)** is the core. A security/ship-blocker audit loop that demonstrates every Hole with a re-runnable exploit test, fixes at the seam, and re-verifies. Produces `FINDINGS.md`.
+- **[plug-the-holes](./skills/plug-the-holes/SKILL.md)** is the core. A security/ship-blocker audit loop that demonstrates every Hole with evidence (a re-runnable exploit test where feasible, or a precise code-inspection finding where not) and **stops there**. Produces `FINDINGS.md` plus a `.deslop/exploits/` suite of RED tests. Does not edit production code — fix work happens in a separate session via `/tdd` or matt's `/to-prd` → `/to-issues` chain.
 - **[launch-gate](./skills/launch-gate/SKILL.md)** writes the go/no-go line, verifies every Confirmed Hole is Closed, and makes the ship call. Produces `GATE.md`.
 
 ## Companion skills (Phase 2)

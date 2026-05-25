@@ -32,7 +32,7 @@ Keep it to a handful of grouped exchanges, not 20 separate questions. If the use
 If the interview reveals no single place tenant scoping is enforced (per-handler copy-paste, or worse, missing), propose the seam appropriate to the stack: a `requireTenant`-style wrapper, a scoped data-access layer, or database row-level security. This is the highest-leverage line in the whole overlay; it's where closing Holes and removing slop become the same edit.
 
 ### 4. Write STACK.md
-Fill [references/STACK-TEMPLATE.md](./references/STACK-TEMPLATE.md) from the answers and write it to the repo root (or `.deslop/STACK.md`). One concrete sentence per category: what the auditor should enumerate, where the seam is, what the tell is for that category's Hole. Note any **Unknown**s explicitly.
+Fill [references/STACK-TEMPLATE.md](./references/STACK-TEMPLATE.md) from the answers and write it to the repo root (or `.deslop/STACK.md`). The template is **table-driven, not prose**: one row per stack layer, one row per audit category. Each "Audit target" cell is a concrete enumeration the auditor can carry out (e.g. *"grep `dist/` for non-`VITE_` secret names"*, *"enumerate handlers that don't call `withOrg(ctx, ...)`"*). Note any **Unknown**s explicitly in the `Unknowns` section — they become things `/plug-the-holes` resolves rather than guesses.
 
 ### 5. Confirm and hand off
 Show the user the generated `STACK.md`, let them correct it, then point them at `/map-the-surface` to begin.

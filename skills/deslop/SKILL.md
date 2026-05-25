@@ -16,23 +16,33 @@ The pipeline is **stack-agnostic by design**. The categories ("is the surface au
 Two phases, one hard line between them: **the Gate**.
 
 ```
-  PHASE 1 - PLUG THE HOLES                   │ GATE │   PHASE 2 - DESLOP PROPER
-  (everything that blocks launch)             │      │   (everything that doesn't)
-                                              │      │
-  setup → recon → audit → close every Hole    │ ship │   consistency → architecture
-                                              │      │   → DRY → bugs → tech debt → features
+  PHASE 1 — AUDIT + FIX + RE-VERIFY            │ GATE │   PHASE 2 — DESLOP PROPER
+  (everything that blocks launch)              │      │   (everything that doesn't)
+                                               │      │
+  setup → recon → audit (stops with RED tests) │ ship │   consistency → architecture
+       → fix work in separate sessions         │      │   → DRY → bugs → tech debt → features
+       → re-run /deslop → all GREEN → SHIP     │      │
 ```
 
 Most teams get this backwards: they tidy the architecture (satisfying) while a tenant-isolation Hole sits open (fatal), or they gold-plate forever and never ship. The pipeline exists to stop both.
 
 ## Run order
 
-Work top to bottom. Don't skip recon: **you cannot audit a surface you haven't mapped**, and generated codebases routinely hide entry points (stray webhooks, debug routes, a second database) the author forgot exist.
+Work top to bottom. `/deslop` is **idempotent** — running it once gives you the audit + a NO-SHIP gate. Running it again *after* fix work has happened (between sessions, via `/tdd` or matt's `/to-prd` → `/to-issues` chain) re-verifies and flips to SHIP if all exploit tests now go GREEN. No flags, no modes; the same command both audits and re-verifies.
 
 0. **`/setup-deslop`**: *First time in a repo only.* Interviews you about the stack and writes `STACK.md`, the overlay every later step reads. Skip if `STACK.md` already exists and the stack hasn't changed.
-1. **`/map-the-surface`**: Recon. Produces `SURFACE.md`: data models, every entry point, where data lives, the tenant model, third-party services, where money moves.
-2. **`/plug-the-holes`**: The security/ship-blocker audit loop. Walk the surface money-and-identity-first, **demonstrate every Hole with an exploit test**, fix, re-verify. Produces a findings log.
-3. **`/launch-gate`**: Write the per-app line, verify every Confirmed Hole is Closed, make the ship / no-ship call. Resist gold-plating.
+1. **`/map-the-surface`**: Recon. Produces `SURFACE.md`: data models, every entry point, where data lives, the tenant model, third-party services, where money moves. Re-runs do drift-detection — surface changes since the last audit will surface as new entries to test.
+2. **`/plug-the-holes`**: The security/ship-blocker audit loop. Walk the surface money-and-identity-first, demonstrate every Hole with **evidence** (a runnable exploit test where feasible, or a precise code-inspection finding where not — see GLOSSARY). **Stops with RED exploit tests; does not edit production code.** Fix work happens in a separate session.
+3. **`/launch-gate`**: Re-run the exploit suite, verify every Confirmed Hole is Closed, make the ship / no-ship call. Resist gold-plating.
+
+### What happens between `/plug-the-holes` and the SHIP call
+
+The audit hands off — it does **not** apply fixes itself, on purpose, so each Hole becomes its own small reviewable PR rather than one catastrophic structural diff. End of `/plug-the-holes` detects matt's skills in the environment and recommends one of two chains:
+
+- **Matt's skills present** → `/to-prd` (publish FINDINGS.md as a launch-readiness PRD) → `/to-issues` (slice the PRD into AFK-ready tickets, one per Hole or seam-group) → AFK agents pick up tickets, or `/tdd` per ticket.
+- **Matt's skills absent** → `/tdd <exploit-test-path>` per Hole, manually. (Install hint: `npx skills add mattpocock/skills`.)
+
+Either way, when fixes are done, **re-run `/deslop`** — the orchestrator re-runs the chain end-to-end, `/plug-the-holes` re-sweeps + re-runs the exploit suite (RED entries become Closed once their tests go GREEN), and `/launch-gate` flips to SHIP.
 
 Then, and only after the gate, Phase 2 is **incremental and never blocks a ship**. Hand off to skills that already do this well rather than reinventing them. These live in `mattpocock/skills` (https://github.com/mattpocock/skills). Names below are indicative; defer to that repo for the current set.
 
@@ -47,4 +57,6 @@ When an app is being ported from one stack to another (e.g. a prototype to your 
 
 ## What "done with Phase 1" means
 
-It does not mean "the code is good". It means: `STACK.md` and `SURFACE.md` exist, every Confirmed Hole is Closed with a green exploit test, and the Gate doc says ship. Ugly-but-safe is a legitimate, intended state. Pretty-but-breachable is not.
+It does not mean "the code is good". It means: `STACK.md` and `SURFACE.md` exist, every Confirmed Hole is Closed (its exploit test is GREEN, or its `code-inspection` evidence has been verified via the documented acceptance step), and `GATE.md` says **SHIP**. Ugly-but-safe is a legitimate, intended state. Pretty-but-breachable is not.
+
+Closing happens in fix-work sessions *between* `/deslop` runs, not inside any one run. The audit's job ends when evidence is in place; the gate's job ends when re-verification is green.

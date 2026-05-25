@@ -14,33 +14,44 @@ Read [../deslop/GLOSSARY.md](../deslop/GLOSSARY.md). Consumes `FINDINGS.md` (fro
 ## Process
 
 ### 1. Write the gate, *before* the final check
-Create `GATE.md` for the app. The criteria are deliberately a closed list. If it's not on here, it does not block launch. Default criteria:
+Create `GATE.md` for the app. The criteria are deliberately a closed list. If it's not on here, it does not block launch. **Scannable format** — checklist with inline current state in the right margin, numbered open-blocker commands underneath. Default shape:
 
 ```markdown
-# GATE - <app name>   ·   target launch: <date>
+# GATE — <app name>   ·   target launch: <date>
+Re-verified: YYYY-MM-DD by running, not by reading.
 
-## Must be TRUE to ship (the line)
-- [ ] Every Confirmed Hole in FINDINGS.md is Closed or Closed-by-control (re-verified green). Count: __ / __
-- [ ] Every Accepted Exception is signed off below (owner + justification). Unsigned exception = NO-SHIP.
-- [ ] SURFACE.md "Unknowns" section is empty (nothing unaudited).
-- [ ] Secrets: nothing exposed in repo/history/bundle; anything ever exposed is rotated.
-- [ ] Tenant isolation proven on every tenant-data path (not assumed).
-- [ ] Paid/AI endpoints are authed AND rate-limited/capped.
-- [ ] Database backups exist and a restore has been tested once.
-- [ ] A bad deploy can be rolled back.
-- [ ] Error tracking is live; money/identity paths have structured logs.
+## Decision: **SHIP** (or **NO-SHIP**)
+Reason: <one line — the single blocking item, or "all line items true">.
 
-## Accepted exceptions (carried risk, eyes open)
+## Must be TRUE to ship
+- [ ] Every Confirmed Hole in FINDINGS.md is Closed or Closed-by-control                    (currently: __ / __)
+- [ ] Every Accepted Exception is signed off below                                          (currently: __)
+- [ ] SURFACE.md Unknowns section is empty                                                   (currently: __ unknown)
+- [ ] No secrets in repo / history / dist bundle                                            (currently: __)
+- [ ] Tenant isolation proven on every tenant-data path                                      (covered by exploit suite)
+- [ ] Paid/AI endpoints authed AND rate-limited/capped                                       (covered by H-__)
+- [ ] Database backups exist + restore tested                                                (currently: __)
+- [ ] Bad deploy can be rolled back                                                          (currently: __)
+- [ ] Error tracking live; structured logs on money/identity paths                          (currently: __)
+
+## Open blockers (commands to run)
+1. **H-__** — `<exact command to verify or close, e.g. bash .deslop/exploits/h__.sh>`
+2. **H-__** — `<…>`
+3. **HD-__** — `<launch-task command, e.g. "one rehearsed restore + evidence to ops/restore-YYYY-MM-DD.md">`
+
+## Accepted exceptions
 <one line per Accepted Exception: finding ID · what it is · why it's accepted · compensating control if any · OWNER who signed off>
 <empty is the healthy default; every line here is a risk you are choosing to ship with>
 
-## Explicitly NOT blocking (parked, fix after launch)
-- Hardening list (HD-*): <count>
+## Explicitly NOT blocking
+- Hardening list (HD-*): <count> → post-gate
 - Improvement list (IM-*): <count> → /improve-codebase-architecture
 - Parked bugs/races: <count> → /diagnose
 ```
 
 Tune the list per app, but tune it *now*, deliberately, not item-by-item under pressure later. Adding a criterion mid-launch "just to be safe" is gold-plating wearing a hard hat.
+
+On re-run after fix work: **update the existing `GATE.md` in place** (re-write the `Decision`, the `Re-verified` date, and the inline `(currently: …)` cells). Don't create a new file per attempt — the diff history in git is the audit trail.
 
 ### 2. Verify by re-running, not re-reading
 For each "must be true" item, **confirm by running, not by trusting the log.** For Holes: re-run the exploit tests in `.deslop/exploits/` and watch them go green, including the *control* tests behind any Closed-by-control finding. A findings log that *says* Closed is evidence. A green exploit test is proof. They can disagree (a later edit reopened something); trust the test.
@@ -51,7 +62,7 @@ If anything is red or unknown, the gate is **NO-SHIP**. Name the exact failing i
 
 ### 3. Make the call
 - **All true → SHIP.** Say so plainly. Parked Hardening/Improvement work does not reduce confidence in the ship decision; that's the whole point of the buckets. Hand the parked lists to Phase 2.
-- **Any false → NO-SHIP.** State the single blocking line (or the few). Route each back: open Hole → `/plug-the-holes`; missing backup/rollback/tracking → it's a launch task, not a deferral. Give the shortest path to green, not a lecture.
+- **Any false → NO-SHIP.** State the single blocking line (or the few). Route each back: open Hole → fix it via `/tdd <exploit-test-path>` (or matt's `/to-prd` → `/to-issues` chain feeding AFK), then re-run `/deslop`; missing backup/rollback/tracking → it's a launch task, not a deferral, do it now. Give the shortest path to green, not a lecture.
 
 ### 4. Resist the drift
 Two pressures will try to move the line, both wrong:
