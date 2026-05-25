@@ -80,55 +80,25 @@ skills/
 
 ## Install & update
 
-Two install paths. Pick the one that matches your agent.
-
-### Claude Code (recommended): the plugin marketplace
-
-Native, first-class install. Skills are auto-discovered and namespaced (`/rendr-forge-skills:deslop`). No symlinks, no extra CLI.
-
-Add the marketplace:
-
-```bash
-/plugin marketplace add Rendr-Web/rendr-forge-skills
-```
-
-Install the plugin:
-
-```bash
-/plugin install rendr-forge-skills@rendr-forge
-```
-
-Pull updates later:
-
-```bash
-/plugin marketplace update rendr-forge
-```
-
-### Any other agent (Codex, Cursor, Gemini CLI, Warp, …): the `skills` CLI
-
-`npx skills` (no global install) writes into the target agent's skills directory. **Pass `-a claude-code` if you want it to install into Claude Code via this path** — without it, the CLI installs into whichever agent it auto-detects, which often isn't claude-code.
-
-Install the whole set:
+One command. Works for any agent (Claude Code, Codex, Cursor, Gemini CLI, Warp, …). Walks you through agent selection and install method interactively.
 
 ```bash
 npx skills add Rendr-Web/rendr-forge-skills
 ```
 
-Install into a specific agent:
+Choose **Symlink** when prompted; it points each agent at one canonical copy so updates are one step.
+
+**If Claude Code isn't auto-detected**, force it explicitly:
 
 ```bash
 npx skills add Rendr-Web/rendr-forge-skills -a claude-code
 ```
 
-Or just the audit core:
+Restart your agent after install so the skill list reloads. You should see `/deslop` available.
 
-```bash
-npx skills add Rendr-Web/rendr-forge-skills --skill plug-the-holes --skill setup-deslop
-```
+### Updates
 
-Choose **Symlink** install when prompted; it points each agent at one canonical copy so updates are one step.
-
-See what's outdated (tracked via `skills-lock.json` + git SHAs):
+See what's outdated:
 
 ```bash
 npx skills check
@@ -140,7 +110,18 @@ Pull the latest:
 npx skills update
 ```
 
-So your release process is just: edit the skills, commit, push. No version bump, no publish. Commit `skills-lock.json` in consuming projects to pin/share exact versions across a team.
+Release process is just: edit the skills, commit, push. No version bump, no publish. Commit `skills-lock.json` in consuming projects to pin/share exact versions across a team.
+
+### Alternative: Claude Code plugin marketplace
+
+For Claude Code users who prefer the native plugin path (no third-party CLI, skills auto-namespaced as `/rendr-forge-skills:deslop`):
+
+```bash
+/plugin marketplace add Rendr-Web/rendr-forge-skills
+/plugin install rendr-forge-skills@rendr-forge
+```
+
+Update later with `/plugin marketplace update rendr-forge`.
 
 ## Credits
 
