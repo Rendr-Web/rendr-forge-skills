@@ -21,7 +21,7 @@ How to log what the audit turns up. One findings file per app, `FINDINGS.md`, ap
 
 ```markdown
 ### H-03 · Tenant isolation · CONFIRMED → CLOSED
-**Category:** §3 Tenant isolation
+**Category:** Tenant isolation
 **Claim:** `api.invoices.list` collects all invoices with no org filter; a logged-in
 user from org A reads org B's invoices.
 **Exploit test:** `deslop/exploits/h03_cross_tenant_invoices.test.ts` - calls list as
