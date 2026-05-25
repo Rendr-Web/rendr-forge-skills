@@ -1,0 +1,11 @@
+{
+  "name": "rendr-forge-skills",
+  "description": "Turn a vibe-coded app into something safe to ship, then methodically better. Stack-agnostic security/ship-blocker audit pipeline.",
+  "skills": [
+    "./skills/deslop",
+    "./skills/setup-deslop",
+    "./skills/map-the-surface",
+    "./skills/plug-the-holes",
+    "./skills/launch-gate"
+  ]
+}
