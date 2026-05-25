@@ -51,9 +51,15 @@ See his README for the current skill list and install options. We deliberately d
 
 ```
 .claude-plugin/plugin.json   (plugin manifest - enables the marketplace install path)
+.out-of-scope/               (deliberate-boundary notes for rejected feature requests)
+.gitignore
 CLAUDE.md                    (repo conventions for contributors)
 LICENSE                      (MIT)
 README.md
+docs/adr/                    (architecture decision records for the repo's own design)
+scripts/
+  list-skills.sh             (enumerate skills in this repo)
+  link-skills.sh             (symlink skills into ~/.claude/skills for local dev)
 skills/
   deslop/            SKILL.md + GLOSSARY.md   (shared language - read first)
   setup-deslop/      SKILL.md
@@ -74,13 +80,13 @@ These skills are distributed the way the agent-skills ecosystem works: **GitHub 
 
 ```bash
 # install the whole set into your agent (Claude Code, Codex, Cursor, etc.)
-npx skills add <your-org>/<your-repo>
+npx skills add Rendr-Web/rendr-forge-skills
 
 # or just the audit core
-npx skills add <your-org>/<your-repo> --skill plug-the-holes --skill setup-deslop
+npx skills add Rendr-Web/rendr-forge-skills --skill plug-the-holes --skill setup-deslop
 
 # install into a specific agent
-npx skills add <your-org>/<your-repo> -a claude-code
+npx skills add Rendr-Web/rendr-forge-skills -a claude-code
 ```
 
 Choose **Symlink** install when prompted; it points each agent at one canonical copy so updates are one step.
@@ -94,7 +100,7 @@ npx skills update    # pull the latest
 
 So your release process is just: edit the skills, commit, push. No version bump, no publish. Commit `skills-lock.json` in consuming projects to pin/share exact versions across a team.
 
-(It also works as a Claude Code plugin marketplace, via `/plugin marketplace add <your-org>/<your-repo>`, if you'd rather distribute that way.)
+(It also works as a Claude Code plugin marketplace, via `/plugin marketplace add Rendr-Web/rendr-forge-skills`, if you'd rather distribute that way.)
 
 ## Credits
 
