@@ -52,7 +52,9 @@ See his README for the current skill list and install options. We deliberately d
 ## Layout
 
 ```
-.claude-plugin/plugin.json   (plugin manifest - enables the marketplace install path)
+.claude-plugin/
+  plugin.json                (plugin manifest - what the plugin contains)
+  marketplace.json           (marketplace catalog - what /plugin marketplace add reads)
 .out-of-scope/               (deliberate-boundary notes for rejected feature requests)
 .gitignore
 CLAUDE.md                    (repo conventions for contributors)
@@ -78,18 +80,38 @@ skills/
 
 ## Install & update
 
-These skills are distributed the way the agent-skills ecosystem works: **GitHub is the registry; there is no npm publish step.** Push this folder to a public repo, and anyone installs it with the `skills` CLI (no global install; `npx` fetches it):
+Two install paths. Pick the one that matches your agent.
 
-Install the whole set into your agent (Claude Code, Codex, Cursor, etc.):
+### Claude Code (recommended): the plugin marketplace
+
+Native, first-class install. Skills are auto-discovered and namespaced (`/rendr-forge-skills:deslop`). No symlinks, no extra CLI.
+
+Add the marketplace:
+
+```bash
+/plugin marketplace add Rendr-Web/rendr-forge-skills
+```
+
+Install the plugin:
+
+```bash
+/plugin install rendr-forge-skills@rendr-forge
+```
+
+Pull updates later:
+
+```bash
+/plugin marketplace update rendr-forge
+```
+
+### Any other agent (Codex, Cursor, Gemini CLI, Warp, …): the `skills` CLI
+
+`npx skills` (no global install) writes into the target agent's skills directory. **Pass `-a claude-code` if you want it to install into Claude Code via this path** — without it, the CLI installs into whichever agent it auto-detects, which often isn't claude-code.
+
+Install the whole set:
 
 ```bash
 npx skills add Rendr-Web/rendr-forge-skills
-```
-
-Or just the audit core:
-
-```bash
-npx skills add Rendr-Web/rendr-forge-skills --skill plug-the-holes --skill setup-deslop
 ```
 
 Install into a specific agent:
@@ -98,9 +120,13 @@ Install into a specific agent:
 npx skills add Rendr-Web/rendr-forge-skills -a claude-code
 ```
 
-Choose **Symlink** install when prompted; it points each agent at one canonical copy so updates are one step.
+Or just the audit core:
 
-**Updates flow from the repo, not a package.** When you push changes, users pull them with:
+```bash
+npx skills add Rendr-Web/rendr-forge-skills --skill plug-the-holes --skill setup-deslop
+```
+
+Choose **Symlink** install when prompted; it points each agent at one canonical copy so updates are one step.
 
 See what's outdated (tracked via `skills-lock.json` + git SHAs):
 
@@ -115,8 +141,6 @@ npx skills update
 ```
 
 So your release process is just: edit the skills, commit, push. No version bump, no publish. Commit `skills-lock.json` in consuming projects to pin/share exact versions across a team.
-
-(It also works as a Claude Code plugin marketplace, via `/plugin marketplace add Rendr-Web/rendr-forge-skills`, if you'd rather distribute that way.)
 
 ## Credits
 
