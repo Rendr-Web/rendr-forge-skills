@@ -80,21 +80,21 @@ skills/
 
 ## Install & update
 
-One command. Works for any agent (Claude Code, Codex, Cursor, Gemini CLI, Warp, …). Walks you through agent selection and install method interactively.
+### Quickstart (30-second setup)
 
-```bash
-npx skills add Rendr-Web/rendr-forge-skills
-```
+1. Run the installer:
 
-Choose **Symlink** when prompted; it points each agent at one canonical copy so updates are one step.
+   ```bash
+   npx skills@latest add Rendr-Web/rendr-forge-skills
+   ```
 
-**If Claude Code isn't auto-detected**, force it explicitly:
+2. When prompted, **pick the skills to install** (the safe default is all 5) and **pick the agents to install them into** (Claude Code, Codex, Cursor, Gemini CLI, Warp, …). Make sure your agent is checked — if it's not in the list, it wasn't auto-detected; pass it explicitly with `-a <agent>`, e.g. `npx skills add Rendr-Web/rendr-forge-skills -a claude-code`.
 
-```bash
-npx skills add Rendr-Web/rendr-forge-skills -a claude-code
-```
+3. Choose **Symlink** when asked for the install method. Each agent then points at one canonical copy, so updates are one step.
 
-Restart your agent after install so the skill list reloads. You should see `/deslop` available.
+4. Restart your agent so the skill list reloads. You should see `/deslop` available.
+
+Then just run `/deslop` and it walks the rest of the pipeline.
 
 ### Updates
 
@@ -114,7 +114,7 @@ Release process is just: edit the skills, commit, push. No version bump, no publ
 
 ### Alternative: Claude Code plugin marketplace
 
-For Claude Code users who prefer the native plugin path (no third-party CLI, skills auto-namespaced as `/rendr-forge-skills:deslop`):
+For Claude Code users who'd rather use the native plugin path (no third-party CLI, skills auto-namespaced as `/rendr-forge-skills:deslop`):
 
 ```bash
 /plugin marketplace add Rendr-Web/rendr-forge-skills
