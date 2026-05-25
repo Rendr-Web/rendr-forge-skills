@@ -78,14 +78,21 @@ skills/
 
 These skills are distributed the way the agent-skills ecosystem works: **GitHub is the registry; there is no npm publish step.** Push this folder to a public repo, and anyone installs it with the `skills` CLI (no global install; `npx` fetches it):
 
+Install the whole set into your agent (Claude Code, Codex, Cursor, etc.):
+
 ```bash
-# install the whole set into your agent (Claude Code, Codex, Cursor, etc.)
 npx skills add Rendr-Web/rendr-forge-skills
+```
 
-# or just the audit core
+Or just the audit core:
+
+```bash
 npx skills add Rendr-Web/rendr-forge-skills --skill plug-the-holes --skill setup-deslop
+```
 
-# install into a specific agent
+Install into a specific agent:
+
+```bash
 npx skills add Rendr-Web/rendr-forge-skills -a claude-code
 ```
 
@@ -93,9 +100,16 @@ Choose **Symlink** install when prompted; it points each agent at one canonical 
 
 **Updates flow from the repo, not a package.** When you push changes, users pull them with:
 
+See what's outdated (tracked via `skills-lock.json` + git SHAs):
+
 ```bash
-npx skills check     # see what's outdated (tracked via skills-lock.json + git SHAs)
-npx skills update    # pull the latest
+npx skills check
+```
+
+Pull the latest:
+
+```bash
+npx skills update
 ```
 
 So your release process is just: edit the skills, commit, push. No version bump, no publish. Commit `skills-lock.json` in consuming projects to pin/share exact versions across a team.
