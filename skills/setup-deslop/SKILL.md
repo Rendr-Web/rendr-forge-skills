@@ -1,6 +1,6 @@
 ---
 name: setup-deslop
-description: One-time per-repo setup for the deslop pipeline. Interviews the user about their stack (auth, payments, backend style, database, secrets, ops); detecting what it can from the repo first; and generates a STACK.md house overlay that the audit skills read. Use the first time deslop / plug-the-holes / launch-gate is run in a project, when there is no STACK.md yet, or when the user's stack has changed (switched auth provider, payment processor, framework, database). Run this before the audit; plug-the-holes depends on STACK.md.
+description: One-time per-repo setup for the deslop pipeline, normally invoked by /deslop as step 0 (skipped if STACK.md already exists). Interviews the user about their stack (auth, payments, backend style, database, secrets, ops); detecting what it can from the repo first; and generates a STACK.md house overlay that the audit skills read. Triggered automatically by /deslop on first use in a repo; invoke directly when the user's stack has changed (switched auth provider, payment processor, framework, database) and STACK.md needs regenerating.
 ---
 
 # Setup Deslop

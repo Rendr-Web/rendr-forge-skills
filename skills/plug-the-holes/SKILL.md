@@ -11,7 +11,7 @@ Find and close the defects that can hurt someone on launch day, and **only** tho
 
 This mirrors the feedback-loop discipline in `/diagnose`: the exploit test *is* the skill. Once you have it, the fix and the proof-of-fix are mechanical.
 
-Prerequisites: `STACK.md` (from `/setup-deslop`, which tells you what "endpoint", "internal", and "tenant scope" mean *in this codebase*) and `SURFACE.md` (from `/map-the-surface`). If `STACK.md` is missing, run `/setup-deslop` first; auditing without it means guessing the stack. Read [../deslop/GLOSSARY.md](../deslop/GLOSSARY.md); severity buckets and finding states are used verbatim.
+Prerequisites: `STACK.md` (from `/setup-deslop`, which tells you what "endpoint", "internal", and "tenant scope" mean *in this codebase*) and `SURFACE.md` (from `/map-the-surface`). Normally `/deslop` will have produced both before routing here; if you are invoking this skill directly and either is missing, stop and run `/deslop` (or just `/setup-deslop` then `/map-the-surface`) first — auditing without them means guessing the stack and the surface. Read [../deslop/GLOSSARY.md](../deslop/GLOSSARY.md); severity buckets and finding states are used verbatim.
 
 ## The order is the method
 

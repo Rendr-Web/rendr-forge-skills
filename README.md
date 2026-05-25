@@ -8,14 +8,16 @@ A small, composable set built in the spirit of [mattpocock/skills](https://githu
 
 ## The pipeline
 
+You only ever type `/deslop`. It is the one entry point; it routes through the rest in order and skips steps whose output already exists (e.g. it skips `/setup-deslop` if `STACK.md` is already in the repo).
+
 ```
-/setup-deslop        ← run once per repo. Interviews your stack → STACK.md (your house overlay).
-/deslop              ← orchestrates the rest.
-  ├── /map-the-surface   recon → SURFACE.md
-  ├── /plug-the-holes    security/ship-blocker audit → FINDINGS.md   ← the core
-  └── /launch-gate       the written go/no-go line → GATE.md
-                         then hand off for Phase 2:
-                         /improve-codebase-architecture · /diagnose · /tdd
+/deslop                       ← the one entry point. Orchestrates everything below.
+  ├── /setup-deslop           step 0: first time in a repo only. Interviews your stack → STACK.md.
+  ├── /map-the-surface        recon → SURFACE.md
+  ├── /plug-the-holes         security/ship-blocker audit → FINDINGS.md   ← the core
+  └── /launch-gate            the written go/no-go line → GATE.md
+                              then hand off for Phase 2:
+                              /improve-codebase-architecture · /diagnose · /tdd
 ```
 
 ## The one idea
@@ -29,10 +31,10 @@ Three heuristics carry most of the weight:
 
 ## Reference
 
-Run them in order; `/deslop` orchestrates and will call the others.
+`/deslop` is the only command you need to invoke. The others are the steps it runs; documented here so you can read what each does (and so you can call one directly if you ever want to re-run a single step).
 
-- **[deslop](./skills/deslop/SKILL.md)** is the orchestrator. It covers the holes-vs-improvement split, the run order, and the hand-off to architecture/diagnosis skills for Phase 2. Start here.
-- **[setup-deslop](./skills/setup-deslop/SKILL.md)** runs once per repo. It interviews you about the stack (detecting what it can) and writes `STACK.md`, the overlay the audit reads.
+- **[deslop](./skills/deslop/SKILL.md)** is the orchestrator and the only entry point. It covers the holes-vs-improvement split, the run order, and the hand-off to architecture/diagnosis skills for Phase 2. Start here.
+- **[setup-deslop](./skills/setup-deslop/SKILL.md)** is step 0 inside `/deslop`, run automatically the first time in a repo (skipped on later runs if `STACK.md` exists). Interviews you about the stack and writes `STACK.md`, the overlay the audit reads.
 - **[map-the-surface](./skills/map-the-surface/SKILL.md)** does recon: data models, entry points, data stores, tenant model, and money flows into `SURFACE.md`.
 - **[plug-the-holes](./skills/plug-the-holes/SKILL.md)** is the core. A security/ship-blocker audit loop that demonstrates every Hole with a re-runnable exploit test, fixes at the seam, and re-verifies. Produces `FINDINGS.md`.
 - **[launch-gate](./skills/launch-gate/SKILL.md)** writes the go/no-go line, verifies every Confirmed Hole is Closed, and makes the ship call. Produces `GATE.md`.
